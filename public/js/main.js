@@ -83,7 +83,7 @@ async function signin(e) {
 			clearInputs(signinName, signinPassword);
 			alert("Logged in successfully.");
 			console.log("logged")
-			//window.location.href = "../Html/chat.html"; // Redirect to chat page
+			window.location.href = "../Html/chat.html"; // Redirect to chat page
 
 		} else if (response.status === 401) {
 			alert("Invalid password. Please enter the correct password.");

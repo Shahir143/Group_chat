@@ -15,7 +15,7 @@ app.use('/user',userRoute)
 
 
 // Sync models with the database
-sequelize.sync().then(() => {
+sequelize.sync({alter:true}).then(() => {
     console.log('Server started on port 4000');
     app.listen(4000);
 }).catch(err => {

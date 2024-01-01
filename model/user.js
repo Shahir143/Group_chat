@@ -23,6 +23,10 @@ const user=sequelize.define('users',{
     password:{
         type:Sequelize.STRING,
         allowNull:false
+    },
+    lastseen:{
+        type:Sequelize.DATE,
+        DefaultValue:new Date()
     }
 })
 

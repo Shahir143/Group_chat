@@ -54,14 +54,27 @@ exports.login = async (req, res, next) => {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
         const user = userData[0].dataValues;
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        
+        bcrypt.compare(password, user.password,async function (err, result){
+            if(err){
+                console.error("Error comparing passwords:", err);
+				return res.status(500).json({ message: "Internal Server Error", success: false });
+            }if(result){
+                const token = generateTokenAuthorization(user);
+                const userId=user.id;
+                const currentTime=new Date();
 
-        if (!isPasswordValid) {
-            return res.status(401).json({ success: false, message: 'Password wrong' });
-        }
+                await User.update({lastseen:currentTime},{where :{id:userId}})
+                res.status(200).json({ success: true, message: 'Login successful', token ,encryptedId:token, lastSeen:currentTime});
+            }else{
+                if (username === user.email) {
+					res.status(401).json({ message: "Password mismatch", success: false });
+				} else {
+					res.status(401).json({ message: "Username mismatch", success: false });
+				}
+            }
+        });
 
-        const token = generateTokenAuthorization(user);
-        res.status(200).json({ success: true, message: 'Login successful', token ,encryptedId:token,});
     } catch (error) {
         console.error('Error in user login:', error);
         res.status(500).json({ success: false, message: 'Error logging in user' });
