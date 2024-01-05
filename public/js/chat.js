@@ -278,8 +278,8 @@ function createContact(data){
     a.id=`${data.id}`
     a.setAttribute("data-conversation",'#conservation-1') //set the data-conservation attribute
     img.classList.add('contact-message-image');
-    img.src="https://i.pinimg.com/236x/fd/14/a4/fd14a484f8e558209f0c2a94bc36b855.jpg"
-    img.alt=`data.username`;
+    img.src=`${data.profile_picture}`
+    img.alt=`${data.username}`;
     nameSpan.className='contact-message-name';
     nameSpan.textContent=`${data.username}`;
     textSpan.classList.add('contact-message-text');
@@ -309,8 +309,8 @@ async function generateHead(userData){
 
         // set attributes
         img.classList.add('conversation-user-image'); // Fix typo here
-        img.src = 'https://i.pinimg.com/236x/fd/14/a4/fd14a484f8e558209f0c2a94bc36b855.jpg';
-        img.alt = 'user profile';
+        img.src = `${userData.profile_picture}`;
+        img.alt = `${userData.username}`;
         divWrapper.classList.add('conversation-user-details'); // Fix typo here
         divName.textContent = `${userData.username}`;
         divStatus.classList.add('conversation-user-status', `${userData.lastseen}`); // Assuming 'online' is a class
@@ -352,11 +352,11 @@ function updateChatButtons(){
     }
 }
 
-async function generateMain(chat, profile_picture){
+async function generateMain(chat, data){
     try{
         clearChatMessages();
         for(const item of chat){
-            await createmessage(item,profile_picture);
+            await createmessage(item,data);
 
         }
     }catch(err){
@@ -367,8 +367,8 @@ function clearChatMessages(){
     const chatArea = document.querySelector(".conversation-wrapper");
     chatArea.innerHTML="";
 }
-async function createmessage(item,profile_picture){
-    console.log(item)
+async function createmessage(item,data){
+    console.log("item--------",data)
     try{
         if(item.isAttachment===true){
             const listItem=document.createElement('li');
@@ -471,23 +471,25 @@ async function createmessage(item,profile_picture){
 
         }else{
             const listItem = document.createElement("li");
-
-			// Determine the CSS class based on message status
-			if (item.messageStatus === "received") {
-				listItem.classList.add("conversation-item", "me");
-			} else {
-				listItem.classList.add("conversation-item");
-			}
-
-			// Create the conversation-item-side div
-			const sideDiv = document.createElement("div");
+            const sideDiv = document.createElement("div");
 			sideDiv.classList.add("conversation-item-side");
 
 			// Create the image element
 			const image = document.createElement("img");
-			image.classList.add("conversation-item-image");
-			image.src = `${profile_picture}`; // Use the actual sender's profile picture URL
+			image.classList.add("conversation-item-image");// Use the actual sender's profile picture URL
 			image.alt = "";
+
+			// Determine the CSS class based on message status
+			if (item.messageStatus === "received") {
+				listItem.classList.add("conversation-item", "me");
+                image.src = `${data.details.profile_picture}`;
+			} else {
+				listItem.classList.add("conversation-item");
+                image.src = `${data.user.profile_picture}`;
+			}
+
+			// Create the conversation-item-side div
+			
 
 			// Append the image to the conversation-item-side div
 			sideDiv.appendChild(image);
@@ -587,8 +589,8 @@ async function generationChat(id) {
         const response = await axios.get(`${baseUrl}/user/getchat/${id}`, {
             headers: { Authorization: token },
         });
+        console.log(response.data)
         const userData = response.data.user;
-
         localStorage.setItem("currentUser", id);
         localStorage.setItem("chatStatus", "true");
 
@@ -597,23 +599,14 @@ async function generationChat(id) {
 
         let messages = 0;
         profile_picture = userData.profile_picture;
-        const chats = await getChatApi(id);
-
+        const reqData = await getChatApi(id);
+        const chats=reqData.messages;
         if (messages === 0 || messages < chats.length) {
+
             messages = chats.length;
-            await generateMain(chats, profile_picture);
-        }
+            await generateMain(chats, reqData);
+    }
 
-        // Set up an interval to check for new messages every 1 second
-        setInterval(async () => {
-            const newChats = await getChatApi(id);
-
-            if (newChats.length > messages) {
-                messages = newChats.length;
-                // Update the screen with new messages
-                await generateMain(newChats, profile_picture);
-            }
-        }, 1000);
     } catch (err) {
         console.log(err);
     }
@@ -627,7 +620,7 @@ async function getChatApi(id){
             }
         });
         if (response.status === 200) {
-            console.log(response.data);
+            console.log("getChatApi",response.data.data);
 			const messages = response.data.data;
 			localStorage.setItem("Messages", JSON.stringify(messages));
 			return messages;
@@ -678,7 +671,7 @@ async function sendChat(id){
         }
     })
     if(response.status===200){
-        profile_picture=response.data.user.profile_picture;
+        profile_picture=response.data;
         createmessage(messageDetails,profile_picture);
         console.log(messageBox.value);
         messageBox.value='';

@@ -24,7 +24,9 @@ exports.signup = async (req, res,) => {
             username: req.body.username,
             email: email,
             phoneNumber: req.body.phoneNumber,
-            password: hash
+            password: hash,
+            profile_picture:req.body.profile_picture,
+            bio:req.body.bio,
         });
         console.log(user);
         return res.status(200).json({ success: true, message: 'User created successfully' });

@@ -30,6 +30,7 @@ exports.addChat=async(req,res)=>{
 exports.getChats=async(req,res)=>{
     const limit=100;
     try{
+        const user=req.user;
         const {id}=req.user;
         const {receiver_id}=req.params;
 
@@ -58,14 +59,14 @@ exports.getChats=async(req,res)=>{
             offset:offset,
             limit:limit,
         })
-
+        const reciverDetails=await User.findByPk(receiver_id)
         const messages=response.map((obj)=>({
             ...obj.dataValues,
             messageStatus:obj.dataValues.senderId==id?'sent':'received',
             prevMessages:offset>0?true:false,
         }))
         
-        res.status(200).json({success:true, messageStatus:"Retrieved all Chats",data:messages})
+        res.status(200).json({success:true, messageStatus:"Retrieved all Chats",data:{messages,user:user,details:reciverDetails}})
     }catch(err){
         console.log(err);
         res.status(500).json({success:false, messageStatus:"Internal server Error.Error in get chats",err})

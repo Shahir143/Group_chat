@@ -2,6 +2,8 @@ const username = document.getElementById("username-signup");
 const email = document.getElementById("email-signup");
 const phoneNumber = document.getElementById("contact-number");
 const password = document.getElementById("password");
+const imgUrl=document.getElementById('imgUrl');
+const bioText=document.getElementById('bio')
 const sign_up_btn = document.querySelector("#sign-up-btn");
 const signupButton = document.getElementById("signup-button");
 
@@ -40,6 +42,8 @@ async function signup() {
 			email: email.value,
 			phoneNumber: phoneNumber.value,
 			password: password.value,
+			profile_picture:imgUrl.value,
+			bio:bio.value
 		};
 
 		// Make a POST call to the backend to save user information

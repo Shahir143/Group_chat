@@ -83,12 +83,10 @@ exports.addContact = async (req, res) => {
           {
             userId: id,
             contactId: contactId,
-            requestStatus: "pending",
           },
           {
             userId: contactId,
             contactId: id,
-            requestStatus: "pending",
           },
         ],
       },
