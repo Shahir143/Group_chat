@@ -578,34 +578,43 @@ async function createmessage(item,profile_picture){
         }
     }catch(err){console.log(err)}
 }
-async function generationChat(id){
+async function generationChat(id) {
     // Clearing the container
-    
-		const container = document.querySelector(".conversation-user");
+    const container = document.querySelector(".conversation-user");
+    container.innerHTML = "";
 
-		container.innerHTML = "";
-
-    try{
-        const response=await axios.get(`${baseUrl}/user/getchat/${id}`,{              
-            headers:{Authorization:token},
-        })
+    try {
+        const response = await axios.get(`${baseUrl}/user/getchat/${id}`, {
+            headers: { Authorization: token },
+        });
         const userData = response.data.user;
 
         localStorage.setItem("currentUser", id);
-		localStorage.setItem("chatStatus", "true");
+        localStorage.setItem("chatStatus", "true");
 
-		// Generate and display the chat head
-		await generateHead(userData);
-		let messages = 0;
-        profile_picture=userData.profile_picture;
-        const chats=await getChatApi(id);
-        if(messages===0||messages<chats.length){
-            messages=chats.length;
-            await generateMain(chats,profile_picture)
+        // Generate and display the chat head
+        await generateHead(userData);
+
+        let messages = 0;
+        profile_picture = userData.profile_picture;
+        const chats = await getChatApi(id);
+
+        if (messages === 0 || messages < chats.length) {
+            messages = chats.length;
+            await generateMain(chats, profile_picture);
         }
-        
-        
-    }catch(err){
+
+        // Set up an interval to check for new messages every 1 second
+        setInterval(async () => {
+            const newChats = await getChatApi(id);
+
+            if (newChats.length > messages) {
+                messages = newChats.length;
+                // Update the screen with new messages
+                await generateMain(newChats, profile_picture);
+            }
+        }, 1000);
+    } catch (err) {
         console.log(err);
     }
 }
