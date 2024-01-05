@@ -245,10 +245,17 @@ async function getAllUser(){
                     
                     await addContact(contactId);
                 }
-                document.querySelectorAll('.conservation').forEach(function(i){
-                    i.classList.remove('active');
-                })
+                // Remove 'active' class from all conversations
+                document.querySelectorAll(".conversation").forEach(function (i) {
+                    i.classList.remove("active");
+                });
+
+                console.log(document.querySelector(".conversation"))
+                // Show the selected conversation
                 document.querySelector("#conversation-1").classList.add("active");
+
+                // Set the chat as active
+                localStorage.setItem("chatActive", "user");
                 await generationChat(this.id);
             })
         })
