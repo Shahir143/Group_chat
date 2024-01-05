@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.2.0/fonts/remixicon.css" rel="stylesheet"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js"></script>
     <link rel="stylesheet" href="../css/chat.css" />
@@ -15,39 +16,42 @@
       <!-- start: Sidebar -->
       <aside class="chat-sidebar">
         <a href="#" class="chat-sidebar-logo" data-title="Q Chat">
-          <i class="ri-wechat-channels-line"></i>
+          <i class="ri-whatsapp-line"></i>
         </a>
         <ul class="chat-sidebar-menu">
           <li class="active">
             <a href="#" data-title="Chats"><i class="ri-chat-3-line"></i></a>
           </li>
           <li>
-            <a href="#" data-title="Contacts"
-              ><i class="ri-contacts-line"></i
-            ></a>
+            <a href="#" data-title="Groups"><i class="ri-group-line"></i></a>
           </li>
           <li>
-            <a href="#" data-title="Groups"
-              ><i class="ri-group-2-line"></i
-            ></a>
+            <a href="#" data-title="Friends"><i class="ri-user-heart-line"></i></a>
           </li>
           <li>
-            <a href="#" data-title="Settings"
-              ><i class="ri-settings-line"></i
-            ></a>
+            <a href="#" data-title="Requests"><i class="ri-user-add-line"></i></a>
           </li>
-          <li class="chat-sidebar-profile">
-            <button type="button" class="chat-sidebar-profile-toggle" data-title="Profile>
+          <li>
+            <a href="#" data-title="Add-Friends"><i class="ri-user-search-line"></i></a>
+          </li>
+
+          <li>
+            <a href="#" data-title="Settings"><i class="ri-settings-line"></i></a>
+          </li>
+          <li class="chat-sidebar-profile" data-title="Profile">
+            <button type="button" class="chat-sidebar-profile-toggle">
               <i class="ri-user-line"></i>
             </button>
-            <ul class="chat-sidebar-profile-dropdown">
+            
+            <ul class="chat-sidebar-profile-dropdown" id="profileDropdown">
               <li>
-                <a href="#"><i class="ri-user-line"></i> Profile</a>
+                  <a href="#" id="profile"><i class="ri-user-line"></i> Profile</a>
               </li>
               <li>
-                <a href="#"><i class="ri-logout-box-line"></i> Logout</a>
+                  <a href="#" id="logout"><i class="ri-logout-box-line"></i> Logout</a>
               </li>
-            </ul>
+          </ul>
+          
           </li>
         </ul>
       </aside>
@@ -58,13 +62,18 @@
         <div class="content-sidebar">
           <div class="content-sidebar-title">Chats</div>
           <form action="" class="content-sidebar-form">
-            <input type="search" class="content-sidebar-input" placeholder="Search..."/>
-            <button type="submit" class="content-sidebar-submit"> <i class="ri-search-line"></i></button>
+            <input type="search" class="content-sidebar-input" placeholder="Search..." />
+            <button type="submit" class="content-sidebar-submit">
+              <i class="ri-search-line"></i>
+            </button>
           </form>
           <div class="content-messages">
-            <ul class="content-messages-list">
-              Contacts
-            </ul>
+            <div class="group-add" id="groupAddDiv">
+              <li>
+                <a href="#" id="add-group-link"><i class="ri-add-line"></i> Create New Group</a>
+              </li>
+            </div>
+            <ul class="content-messages-list"></ul>
           </div>
         </div>
         <!-- end: Content side -->
@@ -75,49 +84,42 @@
         </div>
         <div class="conversation" id="conversation-1">
           <div class="conversation-top">
-            <!-- <button type="button" class="conversation-back">
-              <i class="ri-arrow-left-line"></i>
-            </button> -->
-            <div class="conversation-user">
-              <!-- <img
-                class="conversation-user-image"
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8cGVvcGxlfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60"
-                alt=""
-              />
-              <div>
-                <div class="conversation-user-name">Someone</div>
-                <div class="conversation-user-status online">online</div>
-              </div> -->
-            </div>
-            <div class="conversation-buttons">
+            <div class="conversation-user"></div>
+            <!-- Normal Chat Buttons -->
+            <div class="conversation-buttons active" id="normal-chat-buttons">
               <button type="button"><i class="ri-phone-fill"></i></button>
               <button type="button"><i class="ri-vidicon-line"></i></button>
-              <button type="button">
+              <button type="button" class="info-button" id="info-button-normal">
+                <i class="ri-information-line"></i>
+              </button>
+            </div>
+
+            <!-- Group Chat Buttons -->
+            <div class="conversation-buttons" id="group-chat-buttons">
+              <button type="button"><i class="ri-phone-fill"></i></button>
+              <button type="button"><i class="ri-vidicon-line"></i></button>
+              <button type="button" class="group-add-button active">
+                <i class="ri-add-circle-line"></i>
+              </button>
+              <button type="button" class="info-button" id="info-button-group">
                 <i class="ri-information-line"></i>
               </button>
             </div>
           </div>
           <div class="conversation-main">
-            <ul class="conversation-wrapper"></ul>
+            <ul class="conversation-wrapper fade-in"></ul>
           </div>
           <div class="conversation-form">
             <button type="button" class="conversation-form-button">
-              <i class="ri-emotion-line"></i>
+              <i class="ri-attachment-2" id="attachment"></i>
             </button>
             <div class="conversation-form-group">
-              <textarea
-                class="conversation-form-input"
-                rows="1"
-                id="chat-box"
-                placeholder="Type here..."
-              ></textarea>
+              <textarea class="conversation-form-input" rows="1" id="chat-box" placeholder="Type here..."></textarea>
               <button type="button" class="conversation-form-record">
                 <i class="ri-mic-line"></i>
               </button>
             </div>
-            <button type="button"class="conversation-form-button conversation-form-submit"
-              id="submit-button"
-            >
+            <button type="button" class="conversation-form-button conversation-form-submit" id="submit-button">
               <i class="ri-send-plane-2-line"></i>
             </button>
           </div>
@@ -129,6 +131,62 @@
   </section>
   <!-- end: Chat -->
 
+  <div id="myModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeModal">&times;</span>
+      <h2>Create Group</h2>
+      <form id="groupForm">
+        <label for="groupName">Group Name:</label>
+        <input type="text" id="groupName" name="groupName" required />
+
+        <label for="groupDescription">Description:</label>
+        <textarea id="groupDescription" name="groupDescription" required></textarea>
+        <div class="modal-buttons">
+          <button type="submit" id="confirmBtn">Confirm</button>
+          <button type="button" id="cancelBtn">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- New modal for adding members -->
+  <div id="addMembersModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeAddMembersModal">&times;</span>
+      <h2>Add Members to Group</h2>
+      <form id="addMembersForm">
+        <!-- Dynamically populate with user checkboxes -->
+        <div style="display: flex; margin-top: 5px">
+          <div id="group-members" style="display: block; padding-right: 10px">
+            <div id="manage-checkboxes"></div>
+            <form id="manage-button"></form>
+          </div>
+          <div id="invite-members" style="display: block; padding-right: 10px">
+            <div id="add-checkboxes"></div>
+            <form action="#" id="add-button"></form>
+          </div>
+          <div id="add-admin" style="display: block">
+            <div id="admnin-checkboxes"></div>
+            <form action="#" id="admin-button"></form>
+          </div>
+        </div>
+
+        <div class="modal-buttons">
+          <button type="button" id="cancelAddMembersBtn">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div id="attachmentModal" style="display: none">
+    <div class="modal-content">
+      <form id="uploadForm" enctype="multipart/form-data">
+        <label for="attachment"> attachment</label>
+        <input type="file" name="file" class="attachemnt_input" id="fileInput" multiple />
+        <button id="sendAttachmentButton">Send File</button>
+        <button id="cancelAttachmentButton">Cancel</button>
+      </form>
+    </div>
+  </div>
   <script src="../js/chat.js"></script>
 </body>
 </html>
