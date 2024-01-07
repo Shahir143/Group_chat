@@ -1,4 +1,4 @@
-const baseUrl='http://localhost:4000';
+const baseUrl=process.env.BASE_URL;
 const token=localStorage.getItem('token');
 
 const container=document.querySelector('.content-messages-list');
