@@ -29,11 +29,9 @@ const user=sequelize.define('users',{
         DefaultValue:new Date()
     },profile_picture: {
         type: DataTypes.STRING,
-        defaultValue: 'https://i.pinimg.com/236x/fd/14/a4/fd14a484f8e558209f0c2a94bc36b855.jpg',
       },
     bio:{
         type:DataTypes.TEXT,
-        defaultValue:'No Calls Direct Msgs'
     },
 })
 

@@ -31,7 +31,7 @@ body {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background-color: #f1f5f9;
+	background-image: url('https://w0.peakpx.com/wallpaper/818/148/HD-wallpaper-whatsapp-background-cool-dark-green-new-theme-whatsapp.jpg');
 }
 .chat-container {
 	max-width: 1360px;
@@ -369,14 +369,14 @@ body {
 	font-size: 17px;
 }
 .conversation-user-status {
-	color: #94a3b8;
+	color: #000000;
 	font-size: 13px;
 }
 .conversation-user-status::before {
 	content: "";
 	width: 10px;
 	height: 10px;
-	background-color: #cbd5e1;
+	background-color: #ff0000;
 	border-radius: 50%;
 	vertical-align: middle;
 	display: inline-block;
@@ -748,6 +748,7 @@ body {
 
 #groupName,
 #groupDescription,
+#groupPicture,
 #groupUsers {
 	width: 100%;
 	padding: 10px;

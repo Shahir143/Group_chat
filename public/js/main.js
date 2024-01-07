@@ -35,7 +35,12 @@ async function signup() {
 		if (isInputEmpty(username) || isInputEmpty(email) || isInputEmpty(phoneNumber) || isInputEmpty(password)) {
 			throw new Error("Please enter all details");
 		}
-
+		if(isInputEmpty(imgUrl)){
+			imgUrl.value="https://i.pinimg.com/236x/fd/14/a4/fd14a484f8e558209f0c2a94bc36b855.jpg"
+		}
+		if(isInputEmpty(bio)){
+			bio.value="No Calls Direct Whatspp Msgs"
+		}
 		// User details
 		const signupDetails = {
 			username: username.value,

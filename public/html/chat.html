@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.2.0/fonts/remixicon.css" rel="stylesheet"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js"></script>
     <link rel="stylesheet" href="../css/chat.css" />
+    <link rel="icon" href="../img/pngtree-whatsapp-phone-icon-png-image_6315989.png">
     <title>Group Chat</title>
 </head>
 <body>
@@ -15,7 +16,7 @@
     <div class="chat-container">
       <!-- start: Sidebar -->
       <aside class="chat-sidebar">
-        <a href="#" class="chat-sidebar-logo" data-title="Q Chat">
+        <a href="#" class="chat-sidebar-logo" data-title="whatspp Chat">
           <i class="ri-whatsapp-line"></i>
         </a>
         <ul class="chat-sidebar-menu">
@@ -141,6 +142,8 @@
 
         <label for="groupDescription">Description:</label>
         <textarea id="groupDescription" name="groupDescription" required></textarea>
+        <label for="groupPicture">Group ImageUrl:</label>
+        <textarea id="groupPicture" name="groupPicture" placeholder="imageUrl"></textarea>
         <div class="modal-buttons">
           <button type="submit" id="confirmBtn">Confirm</button>
           <button type="button" id="cancelBtn">Cancel</button>

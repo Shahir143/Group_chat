@@ -1,6 +1,8 @@
 const User = require('../model/user');
 const Contact = require('../model/contactModel');
 const { Op } = require('sequelize');
+const Group=require('../model/groupModel');
+
 
 exports.getContacts = async (req, res) => {
   try {
@@ -17,6 +19,23 @@ exports.getContacts = async (req, res) => {
     console.log('ERROR IN Getting contacts', err);
     res.status(500).json({ success: false, message: 'ERROR IN GETTING CONTACTS' });
   }
+};
+exports.getGroupChat = async (req, res) => {
+	try {
+    const user=req.user
+		const { id } = req.params;
+		const group = await Group.findByPk(id);
+
+    const reciverDetails=await User.findByPk(id)
+		if (!group) {
+			res.status(404).json({ success: false, message: "Group not found" });
+		} else {
+			res.status(200).json({ success: true, message: "Group chat found", data:{group ,user:user,details:reciverDetails}});
+		}
+	} catch (error) {
+		console.error("Error while retrieving group chat:", error);
+		res.status(500).json({ success: false, message: "Internal server error" });
+	}
 };
 exports.getFriends=async (req,res)=>{
   try{

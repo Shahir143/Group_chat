@@ -4,9 +4,22 @@ const token=localStorage.getItem('token');
 const container=document.querySelector('.content-messages-list');
 const contentmessageContainer=document.getElementsByClassName('group-add');
 const groupAdd=document.getElementById('groupAddDiv');
-const modelOpen=document.getElementById('add-group-link');
+const modalOpen=document.getElementById('add-group-link');
 const subtButton=document.getElementById('submit-button');
 const conservation=document.querySelectorAll('.conversation');
+
+const cancelAddMemberButton=document.getElementById('cancelAddMembersBtn');
+const groupAddButton=document.getElementsByClassName('group-add-button');
+const profileToggleBtn=document.getElementById(".chat-sidebar-profile-toggle");
+const infoButton = document.getElementById("info-button-group");
+const addMembersModal = document.getElementById("addMembersModal");
+const closeAddMembersModal = document.getElementById("closeAddMembersModal");
+const addMembersbutton = document.getElementById("manage-button");
+const multiMediaButton = document.getElementById("attachment");
+const attachButton = document.getElementById("sendAttachmentButton");
+const fileInput = document.getElementById("fileInput");
+const attachmentModal = document.getElementById("attachmentModal");
+const cancelButton = document.getElementById("cancelAttachmentButton");
 
 
 let profile_picture;
@@ -28,6 +41,21 @@ profileDropdown.addEventListener("click", (e) => {
 
 });
 
+function updateChatButtons(){
+    console.log("updateChatButtons");
+    const chatActive=localStorage.getItem("chatActive");
+    const nrmlChatBtn=document.getElementById("normal-chat-buttons");
+    const grpChatBtn=document.getElementById("group-chat-buttons");
+    if(chatActive==="user"){
+        nrmlChatBtn.style.display="flex";
+        grpChatBtn.style.display="none";
+    }else if(chatActive==="group"){
+        nrmlChatBtn.style.display="none";
+        grpChatBtn.style.display="flex";
+    }else{
+        console.log("error in activting buttons",chatActive)
+    }
+}
 
 document.addEventListener('DOMContentLoaded',async function(e){
     e.preventDefault();
@@ -320,9 +348,8 @@ async function generateHead(userData){
         img.alt = `${userData.username}`;
         divWrapper.classList.add('conversation-user-details'); // Fix typo here
         divName.textContent = `${userData.username}`;
-        divStatus.classList.add('conversation-user-status', `${userData.lastseen}`); // Assuming 'online' is a class
+        divStatus.classList.add('conversation-user-status', `online`); // Assuming 'online' is a class
         const lastSeenDate = new Date(userData.lastseen);
-
         const formattedDate = `${crtTime(lastSeenDate.getHours())}:${crtTime(lastSeenDate.getMinutes())}:${crtTime(lastSeenDate.getSeconds())} ${crtTime(lastSeenDate.getDate())}-${crtTime(lastSeenDate.getMonth() + 1)}-${lastSeenDate.getFullYear()}`;
 
         divStatus.textContent = formattedDate;
@@ -343,22 +370,6 @@ async function generateHead(userData){
     }
 }
 
-function updateChatButtons(){
-    console.log("updateChatButtons");
-    const chatActive=localStorage.getItem("chatActive");
-    const nrmlChatBtn=document.getElementById("normal-chat-buttons");
-    const grpChatBtn=document.getElementById("group-chat-buttons");
-    if(chatActive==="user"){
-        nrmlChatBtn.style.display="flex";
-        grpChatBtn.style.display="none";
-    }else if(chatActive==="group"){
-        nrmlChatBtn.style.display="none";
-        grpChatBtn.style.display="flex";
-    }else{
-        console.log("error in activting buttons",chatActive)
-    }
-}
-
 async function generateMain(chat, data){
     try{
         clearChatMessages();
@@ -375,22 +386,27 @@ function clearChatMessages(){
     chatArea.innerHTML="";
 }
 async function createmessage(item,data){
-    console.log("item--------",data)
+    console.log("item for create message",data)
     try{
         if(item.isAttachment===true){
-            const listItem=document.createElement('li');
-            if(item.messageStatus==='received'){
-                listItem.classList.add('conservation-item',"me");
-            }else{
-                listItem.classList.add('conservation-item');
-            }
-            const sideDiv=document.createElement('div');
-            sideDiv.classList.add('conservation-item-image');
+            const listItem = document.createElement("li");
+            const sideDiv = document.createElement("div");
+			sideDiv.classList.add("conversation-item-side");
 
-            const image=document.createElement('img');
-            image.classList.add('conservation-item-image');
-            image.src=`${profile_picture}`;
-            image.alt="";
+			// Create the image element
+			const image = document.createElement("img");
+			image.classList.add("conversation-item-image");// Use the actual sender's profile picture URL
+			image.alt = "";
+
+			// Determine the CSS class based on message status
+			if (item.messageStatus === "received") {
+				listItem.classList.add("conversation-item", "me");
+                image.src = `${data.details.profile_picture}`;
+			} else {
+				listItem.classList.add("conversation-item");
+                image.src = `${data.user.profile_picture}`;
+			}
+
 
             //append the image to the conservation-item-side div
             sideDiv.append(img);
@@ -494,8 +510,6 @@ async function createmessage(item,data){
 				listItem.classList.add("conversation-item");
                 image.src = `${data.user.profile_picture}`;
 			}
-
-			// Create the conversation-item-side div
 			
 
 			// Append the image to the conversation-item-side div
@@ -593,9 +607,7 @@ async function generationChat(id) {
     container.innerHTML = "";
 
     try {
-        const response = await axios.get(`${baseUrl}/user/getchat/${id}`, {
-            headers: { Authorization: token },
-        });
+        const response = await axios.get(`${baseUrl}/user/getchat/${id}`, {headers: { Authorization: token },});
         console.log(response.data)
         const userData = response.data.user;
         localStorage.setItem("currentUser", id);
@@ -621,11 +633,7 @@ async function generationChat(id) {
 
 async function getChatApi(id){
     try{
-        const response =await axios.get(`${baseUrl}/chat/get-chat/${id}`,{
-            headers:{
-                Authorization:token
-            }
-        });
+        const response =await axios.get(`${baseUrl}/chat/get-chat/${id}`,{headers:{Authorization:token}});
         if (response.status === 200) {
             console.log("getChatApi",response.data.data);
 			const messages = response.data.data;
@@ -649,7 +657,7 @@ subtButton.addEventListener('click', ()=>{
             sendChat(chatId);
         }else if(openedChat==='group'){
             console.log("sending a group message");
-            sendGroupId(groupId);
+            sendGroupMsg(groupId);
         }else{
             console.log("invalid chat type",openedChat)
         }
@@ -660,7 +668,6 @@ subtButton.addEventListener('click', ()=>{
 
 async function sendChat(id){
     try{
-    
     const receiver =localStorage.getItem('currentUser');
     const conservationType=localStorage.getItem('chatActive');
 
@@ -690,5 +697,670 @@ async function sendChat(id){
     }   
 }
 async function getAllGroups(){
-    console.log("Getting all Groups");
+    try{
+        conservation[1].classList.remove('active');
+        conservation[0].classList.add('active');
+        container.innerHTML="";
+        groupAdd.classList.toggle('active');
+
+        const response=await axios.get(`${baseUrl}/groups/getGroups`,{
+            headers:{Authorization:token}
+        })
+        if(response && response.data && response.data.data){
+            const groups=response.data.data;
+            for(const group of groups){
+                await createGroupCard(group);
+            }
+        }
+        document.querySelectorAll("[data-conversation]").forEach(function (item) {
+            item.addEventListener("click", async function (e) {
+                e.preventDefault();
+                const groupId = item.id;
+
+                // Remove 'active' class from all conversations
+                document.querySelectorAll(".conversation").forEach(function (i) {
+                    i.classList.remove("active");
+                });
+
+                // Show the selected conversation
+                document.querySelector("#conversation-1").classList.add("active");
+
+                // Set the chat as active
+                localStorage.setItem("chatActive", "group");
+
+                // Generate the chat for the selected friend (assuming you have a function named generateChat)
+                await generationGroupChat(groupId)
+            })
+        })
+    }catch(err){
+        console.log("Error in geting groups",err)
+    }
+}
+async function generationGroupChat(id){
+    try{
+        const container=document.querySelector('.conversation-user');
+        container.innerHTML="";
+
+        const response=await axios.get(`${baseUrl}/user/getGroupchat/${id}`,{headers:{Authorization:token},});
+
+        console.log("response",response)
+        const userData=response.data.data.group;
+        localStorage.setItem('currentGroup',userData.id);
+        localStorage.setItem('chatStatus','true');
+        const reqData=response.data.data
+        await groupHead(userData);
+
+        const consersationWrapper=document.querySelector('.conversation-wrapper');
+
+        let groupMessages=0;
+        const groupChats=await getGroupApi(id);
+
+        if(groupMessages===0||groupChats<groupChats.length){
+            groupMessages=groupChats.length;
+            await groupMain(groupChats,reqData);
+        }
+    }catch(err){
+        console.log("Error in generating groups",err)
+    }
+}
+async function groupHead(userData){
+    try{
+        console.log(userData);
+        const container = document.querySelector(".conversation-user");
+
+		const img = document.createElement("img");
+		const divWrapper = document.createElement("div");
+		const divName = document.createElement("div");
+		const divStatus = document.createElement("div");
+
+		// Set attributes and text content
+		img.classList.add("conversation-user-image");
+		img.src = `${userData.profile_picture}`;
+		img.alt = "";
+		divWrapper.classList.add("conversation-user-details");
+		divName.classList.add("conversation-user-name");
+		divName.textContent = `${userData.group_name}`;
+		divStatus.classList.add("conversation-user-status", "online");
+		divStatus.textContent = "online";
+
+		// Append elements to build the structure
+		divWrapper.appendChild(divName);
+		divWrapper.appendChild(divStatus);
+
+		// Clear the container before appending new elements
+		container.innerHTML = "";
+
+		// Append the newly created structure to the container
+		container.appendChild(img);
+		container.appendChild(divWrapper);
+		updateChatButtons();
+    }catch(err){
+        console.log("Error in generating group heads",err)
+    }
+}
+async function groupMain(data,profile_picture){
+    try{
+        for(const item of data){
+            console.log(item);
+            await createmessage(item,profile_picture);
+        }
+    }catch(err){console.log("Error in groupMain",err)}
+}
+async function getGroupApi(groupId){
+    try{
+        const response=await axios.get(`${baseUrl}/chat/getGroupchat/${groupId}`,{headers:{Authorization:token},})
+        if(response.status===200){
+            const groupMessages=response.data.data;
+            localStorage.setItem("GroupMessages",JSON.stringify(groupMessages));
+            return groupMessages;
+        }else{
+            console.log("Failed to fetch group chat messages")
+        }
+    }catch(err){console.log("Error in getgroupsApi",err)}
+}
+function createGroup(){
+    console.log('create group');
+    const modal =document.getElementById('myModel');
+    const closeModel=document.getElementById("closeModel");
+
+    modal.style.display="block";
+
+    closeModel.addEventListener("click",function(){
+        modal.style.display="none";
+    })
+    window.addEventListener("click",function(e){
+        if(e.target==modal){
+            modal.style.display='none';
+        }
+    })
+}
+
+infoButton.addEventListener("click",async()=>{
+    const groupId=localStorage.getItem("currentGroup");
+    try{
+        const checkAdmin=await axios.get(`${baseUrl}/groups/${groupId}/isAdmin`,{
+            headers:{Authorization:token}
+        });
+        console.log(checkAdmin.data);
+        const {isAdmin}=checkAdmin.data;
+        if(isAdmin===true){
+            addMembersModal.style.display="block";
+            const response=await axios.get(`${baseUrl}/groups/${groupId}/contacts`,{
+                headers:{Authorization:token}
+            });
+            const {nonExistingUsers, existingUsers, nonAdminUsers}=response.data.data;
+            console.log('nonExistingUsers, existingUsers, nonAdminUsers',nonExistingUsers, existingUsers, nonAdminUsers)
+            const addUserBoxes = document.getElementById("invite-members");
+			const existingUserBoxes = document.getElementById("group-members");
+			const addAdminBoxes = document.getElementById("add-admin");
+			addUserBoxes.innerHTML = "";
+			existingUserBoxes.innerHTML = "";
+            if(nonExistingUsers.length>0){
+                addUserBoxes.innerHTML=`<p>Invite Users</p><br/>`;
+                const boxedDiv=document.createElement("div");
+                nonExistingUsers.forEach((nonExistingUser)=>{
+                    const checkBox=document.createElement("input");
+                    checkBox.type="checkbox";
+                    checkBox.name="addUsers";
+                    checkBox.value=nonExistingUser.id;
+                    checkBox.id=`addUserBox-${nonExistingUser.id}`;
+
+                    const label =document.createElement('label');
+                    label.setAttribute("for", `addUserBox-${nonExistingUser.id}`);
+					label.innerText = nonExistingUser.username;
+
+					boxedDiv.appendChild(checkBox);
+					boxedDiv.appendChild(label);
+				});
+				const buttonDiv = document.createElement("div");
+				const addMembersbutton = document.createElement("button");
+
+				// Set attributes and properties for the button
+				addMembersbutton.setAttribute("type", "submit");
+				addMembersbutton.setAttribute("id", "confirmAddMembersBtn");
+				addMembersbutton.textContent = "Add Members";
+				buttonDiv.appendChild(addMembersbutton);
+
+				addUserBoxes.appendChild(boxedDiv);
+				addUserBoxes.appendChild(buttonDiv);
+				addMembersbutton.addEventListener("click", async (e) => {
+					e.preventDefault();
+					try {
+						// Get all checkboxes with the name "selectedUsers"
+						const checkboxes = document.querySelectorAll('input[name="addUsers"]');
+
+						// Create an array to store the IDs of checked checkboxes
+						const checkedUserIds = [];
+
+						checkboxes.forEach((checkbox) => {
+							if (checkbox.checked) {
+								// If a checkbox is checked, add its value (which should be the user ID) to the array
+								checkedUserIds.push(checkbox.value);
+							}
+						});
+
+						// Prepare the data for the group invitation
+						const details = {
+							user_ids: checkedUserIds,
+						};
+
+						// Get the current group's ID from local storage
+						//groupId
+						const getGroup = JSON.parse(localStorage.getItem("currentGroup"));
+
+						// Send an invite to the selected users
+						const response = await axios.post(`${baseUrl}/groups/${getGroup}/invite`, details, {
+							headers: { Authorization: token },
+						});
+
+						// // Handle the response as needed
+						console.log("Invitation sent successfully:", response);
+
+						// Close the "Add Members" modal
+						addMembersModal.style.display = "none";
+
+						// You can perform additional actions based on the response, such as updating the UI.
+					} catch (error) {
+						console.error("Error handling Add Member button click:", error);
+
+						// Handle errors, display an error message, or take appropriate actions.
+					}
+				});
+			}
+			if (existingUsers.length > 0) {
+				existingUserBoxes.innerHTML = `<p>Manage users</p> <br/>`;
+				const boxedDiv = document.createElement("div");
+				existingUsers.forEach((existingUser) => {
+					const checkBox = document.createElement("input");
+					checkBox.type = "checkbox";
+					checkBox.name = "deleteusers";
+					checkBox.value = existingUser.id;
+					checkBox.id = `addUserBox-${existingUser.id}`;
+
+					const label = document.createElement("label");
+					label.setAttribute("for", `addUserBox-${existingUser.id}`);
+					label.innerText = existingUser.username;
+					boxedDiv.appendChild(checkBox);
+					boxedDiv.appendChild(label);
+				});
+				const buttonDiv = document.createElement("div");
+				const delbutton = document.createElement("button");
+
+				
+				delbutton.setAttribute("type", "submit");
+				delbutton.setAttribute("id", "deleteUserButton");
+				delbutton.textContent = "Delete Member";
+				buttonDiv.appendChild(delbutton);
+
+				existingUserBoxes.appendChild(boxedDiv);
+				existingUserBoxes.appendChild(buttonDiv);
+				delbutton.addEventListener("click", async (e) => {
+					e.preventDefault();
+					try {
+						
+                        const checkboxes = document.querySelectorAll('input[name="deleteusers"]');
+
+						const checkedUserIds = [];
+
+						checkboxes.forEach((checkbox) => {
+							if (checkbox.checked) {
+								
+                                checkedUserIds.push(checkbox.value);
+							}
+						});
+
+						const details = {
+							user_ids: checkedUserIds,
+						};
+
+						const response = await axios.post(`${baseUrl}/groups/${groupId}/delete`, details, {
+							headers: { Authorization: token },
+						});
+
+						console.log("User removed  successfully:", response);
+
+						addMembersModal.style.display = "none";
+
+						} catch (error) {
+						console.error("Error handling Add Member button click:", error);
+
+						}
+				});
+			}
+            
+			if (nonAdminUsers.length > 0) {
+				addAdminBoxes.innerHTML = `<p>Make Admin</p> <br/>`;
+				const boxedDiv = document.createElement("div");
+				nonAdminUsers.forEach((nonAdminUser) => {
+					const checkBox = document.createElement("input");
+					checkBox.type = "checkbox";
+					checkBox.name = "makeadmin";
+					checkBox.value = nonAdminUser.id;
+					checkBox.id = `addUserBox-${nonAdminUser.id}`;
+
+					const label = document.createElement("label");
+					label.setAttribute("for", `addUserBox-${nonAdminUser.id}`);
+					label.innerText = nonAdminUser.username;
+					boxedDiv.appendChild(checkBox);
+					boxedDiv.appendChild(label);
+				});
+				const buttonDiv = document.createElement("div");
+				const addAdminButton = document.createElement("button");
+
+				addAdminButton.setAttribute("type", "submit");
+				addAdminButton.setAttribute("id", "makeAdminButton");
+				addAdminButton.textContent = "Make Admin";
+				buttonDiv.appendChild(addAdminButton);
+
+				addAdminBoxes.appendChild(boxedDiv);
+				addAdminBoxes.appendChild(buttonDiv);
+
+				addAdminButton.addEventListener("click", async (e) => {
+					e.preventDefault();
+					try {
+						
+                        const checkboxes = document.querySelectorAll('input[name="makeadmin"]');
+
+                        const checkedUserIds = [];
+
+						checkboxes.forEach((checkbox) => {
+							if (checkbox.checked) {
+								checkedUserIds.push(checkbox.value);
+							}
+						});
+
+						const details = {
+							user_ids: checkedUserIds,
+						};
+
+						const response = await axios.post(`${baseUrl}/groups/${groupId}/admin`, details, {
+							headers: { Authorization: token },
+						});
+
+						console.log("Admin updated  successfully:", response);
+
+						addMembersModal.style.display = "none";
+
+						} catch (error) {
+						console.error("Error handling Add Member button click:", error);
+
+						}
+				});
+			}
+		}
+	} catch (error) {
+		console.log("Error handling infoButton click:", error);
+		}
+});
+closeAddMembersModal.addEventListener("click", () => {
+	addMembersModal.style.display = "none";
+});
+
+cancelAddMemberButton.addEventListener("click", () => {
+	addMembersModal.style.display = "none";
+});
+
+function toggleProfileSidebar(e) {
+	try {
+		e.preventDefault();
+		const parentElement = this.parentElement;
+		if (parentElement) {
+			parentElement.classList.toggle("active");
+		}
+	} catch (error) {
+		console.error("Error toggling profile sidebar:", error);
+	}
+}
+
+if (profileToggleBtn) {
+	profileToggleBtn.addEventListener("click", toggleProfileSidebar);
+}
+
+function closeProfileSidebarOnClick(e) {
+	try {
+		if (!e.target.matches(".chat-sidebar-profile, .chat-sidebar-profile *")) {
+			const profileSidebar = document.querySelector(".chat-sidebar-profile");
+			if (profileSidebar) {
+				profileSidebar.classList.remove("active");
+			}
+		}
+	} catch (error) {
+		console.error("Error handling click event:", error);
+	}
+}
+
+document.addEventListener("click", closeProfileSidebarOnClick);
+
+function toggleConversationItemDropdown(e) {
+	try {
+		e.preventDefault();
+		const parentElement = this.parentElement;
+		if (parentElement.classList.contains("active")) {
+			parentElement.classList.remove("active");
+		} else {
+			// Deactivate all other conversation item dropdowns
+			document.querySelectorAll(".conversation-item-dropdown").forEach(function (item) {
+				item.classList.remove("active");
+			});
+			parentElement.classList.add("active");
+		}
+	} catch (error) {
+		console.error("Error handling click event:", error);
+	}
+}
+
+document.querySelectorAll(".conversation-item-dropdown-toggle").forEach(function (item) {
+	item.addEventListener("click", toggleConversationItemDropdown);
+});
+
+function handleOutsideClick(e) {
+	try {
+		if (!e.target.matches(".conversation-item-dropdown, .conversation-item-dropdown *")) {
+			// Deactivate all conversation item dropdowns
+			document.querySelectorAll(".conversation-item-dropdown").forEach(function (item) {
+				item.classList.remove("active");
+			});
+		}
+	} catch (error) {
+		console.error("Error handling click event:", error);
+	}
+}
+
+document.addEventListener("click", handleOutsideClick);
+
+function adjustTextareaRows(event) {
+	try {
+		const textarea = event.target;
+		textarea.rows = textarea.value.split("\n").length;
+	} catch (error) {
+		console.error("Error adjusting textarea rows:", error);
+	}
+}
+
+document.querySelectorAll(".conversation-form-input").forEach(function (item) {
+	item.addEventListener("input", adjustTextareaRows);
+});
+
+function handleConversationClick(event) {
+	try {
+		event.preventDefault();
+
+		// Deactivate all conversation elements
+		document.querySelectorAll(".conversation").forEach(function (conversation) {
+			conversation.classList.remove("active");
+		});
+
+		// Activate the selected conversation element
+		const targetConversation = document.querySelector(event.target.dataset.conversation);
+		if (targetConversation) {
+			targetConversation.classList.add("active");
+		}
+	} catch (error) {
+		console.error("Error handling conversation click:", error);
+	}
+}
+
+document.querySelectorAll("[data-conversation]").forEach(function (item) {
+	item.addEventListener("click", handleConversationClick);
+});
+
+function handleConversationBackClick(event) {
+	try {
+		event.preventDefault();
+
+		// Deactivate the current conversation
+		const currentConversation = event.target.closest(".conversation");
+		if (currentConversation) {
+			currentConversation.classList.remove("active");
+		}
+
+		// Activate the default conversation
+		const defaultConversation = document.querySelector(".conversation-default");
+		if (defaultConversation) {
+			defaultConversation.classList.add("active");
+		}
+	} catch (error) {
+		console.error("Error handling conversation back click:", error);
+	}
+}
+
+document.querySelectorAll(".conversation-back").forEach(function (item) {
+	item.addEventListener("click", handleConversationBackClick);
+});
+function isInputEmpty(input) {
+	return input.value.trim() === "";
+}
+function handleModal() {
+	console.log("modal opened");
+	try {
+		const modal = document.getElementById("myModal");
+		const closeModalButton = document.getElementById("closeModal");
+		const confirmButton = document.getElementById("confirmBtn");
+		const cancelButton = document.getElementById("cancelBtn");
+
+
+		modal.style.display = "block";
+
+		closeModalButton.addEventListener("click", () => {
+			modal.style.display = "none"; 
+		});
+
+		// Add an event listener to handle form submission
+
+		confirmButton.addEventListener("click", async (e) => {
+			try {
+				e.preventDefault();
+
+				const groupName = document.getElementById("groupName").value;
+                const groupDescription = document.getElementById("groupDescription").value;
+                const profile_picture= document.getElementById('groupPicture');
+
+                
+               
+                if(isInputEmpty(profile_picture)){
+                    profile_picture.value="https://cdn6.aptoide.com/imgs/1/2/2/1221bc0bdd2354b42b293317ff2adbcf_icon.png"
+                }
+
+                const groupDetails = {
+                    group_name: groupName,
+                    group_description: groupDescription,
+                    profile_picture: profile_picture.value
+                };
+
+                console.log(groupDetails);
+				// Send a POST request to the server to create the group
+				const response = await axios.post(`${baseUrl}/groups/create-group`, groupDetails, {
+					headers: { Authorization: token },
+				});
+
+                console.log(response.data)
+                const group=response.data.data;
+				modal.style.display = "none";
+                await createGroupCard(group);
+
+                const groupId = group.id;
+
+                // Remove 'active' class from all conversations
+                document.querySelectorAll(".conversation").forEach(function (i) {
+                    i.classList.remove("active");
+                });
+
+                // Show the selected conversation
+                document.querySelector("#conversation-1").classList.add("active");
+
+                // Set the chat as active
+                localStorage.setItem("chatActive", "group");
+
+                // Generate the chat for the selected friend (assuming you have a function named generateChat)
+                await generationGroupChat(groupId)
+			} catch (error) {
+				console.error("Error submitting form:", error);
+				}
+		});
+
+		cancelButton.addEventListener("click", () => {
+			modal.style.display = "none"; // Hide the modal
+		});
+	} catch (error) {
+		console.error("Error handling modal:", error);
+		}
+}
+
+modalOpen.addEventListener("click", handleModal);
+
+
+async function getSelfDetails() {
+	const selfDetails = await axios.get(`${baseUrl}/user/self`, { headers: { Authorization: token } });
+	profile_picture = selfDetails.data.data.profile_picture;
+    console.log(selfDetails)
+}
+
+getSelfDetails();
+function createGroupCard(data) {
+	try {
+		// Create the elements
+		const li = document.createElement("li");
+		const a = document.createElement("a");
+		const img = document.createElement("img");
+		const info = document.createElement("span");
+		const nameSpan = document.createElement("span");
+		const textSpan = document.createElement("span");
+		const more = document.createElement("span");
+
+		// Set attributes and text content
+		a.href = "#";
+		a.id = `${data.id}`;
+		a.setAttribute("data-conversation", "#conversation-1"); // Set the data-conversation attribute
+		img.classList.add("content-message-image");
+		img.src = `${data.profile_picture}`;
+		img.alt = "";
+		nameSpan.classList.add("content-message-name");
+		nameSpan.textContent = `${data.group_name}`;
+		textSpan.classList.add("content-message-text");
+		textSpan.textContent = `${data.group_description}`;
+
+		// Append elements to build the structure
+		a.appendChild(img);
+		a.appendChild(info);
+		info.appendChild(nameSpan);
+		info.appendChild(textSpan);
+		a.appendChild(more);
+		li.appendChild(a);
+
+		// Append the newly created structure to the container
+		container.appendChild(li);
+	} catch (error) {
+		console.error("Error in createGroupCard:", error);
+		// Optionally, you can handle errors here, such as displaying an error message to the user.
+	}
+}
+async function sendGroupMsg(groupId) {
+	try {
+		// Get the receiver (current group) and conversation type from local storage
+		const receiver = localStorage.getItem("currentGroup");
+		const conversation_type = localStorage.getItem("chatActive");
+
+		// Get the message text from the chat box
+        
+		const chatBox = document.getElementById("chat-box");
+		const message = chatBox.value;
+
+		// Check if the message is empty before sending
+		if (!message.trim()) {
+			console.log("Message cannot be empty.");
+			return;
+		}
+
+		// Create a message detail object
+		const messageDetail = {
+			content: message,
+			conversation_type: conversation_type,
+			receiver: receiver,
+			timeStamp: new Date(),
+			messageStatus: "sent",
+		};
+
+		//Use the socket associated with this group
+        const response=await axios.post(`${baseUrl}/chat/sendGroupChat`,messageDetail,{
+            headers:{
+                Authorization:token,
+            }
+        })
+        console.log(response.data.data)
+        
+        if(response.status===200){
+            profile_picture=response.data.data;
+            createmessage(messageDetail,profile_picture);
+            console.log(chatBox.value);
+            chatBox.value='';
+        }else{
+            console.log('response failed in sendMessage')
+        }
+        
+		// Clear the chat box after sending
+		chatBox.value = "";
+	} catch (error) {
+		console.error("Error sending group message:", error.message);
+		// You can add additional error handling logic here, such as displaying an error message to the user.
+	}
 }
