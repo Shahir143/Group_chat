@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 require('dotenv').config();
 const app = express();
-const path=require('path');
+
 const sequelize = require('./util/database');
 const userRoute = require('./routers/userRoute');
 const chatRoute = require('./routers/chatRouter');
@@ -29,7 +29,7 @@ Message.belongsTo(User, { as: 'group', foreignKey: 'groupId' });
 
 app.use(bodyParser.json());
 app.use(cors());
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static("public"));
 
 app.use('/user', userRoute);
 app.use('/chat',chatRoute); 
