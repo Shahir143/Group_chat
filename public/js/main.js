@@ -13,7 +13,7 @@ const signinPassword = document.getElementById("signin-password");
 const sign_in_btn = document.querySelector("#sign-in-btn");
 const signinButton = document.getElementById("signin-button");
 const container = document.querySelector(".container");
-const BASE_URL='http://localhost:4000';
+const BASE_URL='http://13.233.123.136:4000';
 // Event Listeners
 sign_up_btn.addEventListener("click", () => {
 	container.classList.add("sign-up-mode");
@@ -66,9 +66,7 @@ async function signup() {
 	}
 }
 
-/**
- * Function for handling user sign-in.
- */
+
 async function signin(e) {
 	e.preventDefault();
 	try {
@@ -108,28 +106,16 @@ async function signin(e) {
 	}
 }
 
-/**
- * Helper function to check if an input field is empty.
- * @param {HTMLInputElement} input - The input field to check.
- * @returns {boolean} True if the input is empty, false otherwise.
- */
+
 function isInputEmpty(input) {
 	return input.value.trim() === "";
 }
 
-/**
- * Helper function to clear input fields.
- * @param {...HTMLInputElement} inputs - Input fields to clear.
- */
+
 function clearInputs(...inputs) {
 	inputs.forEach((input) => (input.value = ""));
 }
 
-/**
- * Helper function to handle errors.
- * @param {Error} error - The error object.
- * @param {string} message - The error message to display.
- */
 function handleError(error, message) {
 	console.error(message);
 	console.error(error.message);

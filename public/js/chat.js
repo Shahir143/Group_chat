@@ -1,4 +1,4 @@
-const baseUrl=process.env.BASE_URL;
+const baseUrl='http://13.233.123.136:4000';
 const token=localStorage.getItem('token');
 
 const container=document.querySelector('.content-messages-list');
