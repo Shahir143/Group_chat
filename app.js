@@ -37,6 +37,7 @@ app.use('/chat',chatRoute);
 app.use("/groups", GrpRoute); 
 
 app.use(express.static(path.join(__dirname, "public")));
+
 app.use((req, res) => {
 	let url = req.url;
 	if (req.url.charAt(req.url.length - 1) == "?") {
@@ -45,8 +46,6 @@ app.use((req, res) => {
 
 	res.sendFile(path.join(__dirname, `/public/html/${url}`));
 });
-
-
 
 // Sync models with the database
 sequelize.sync().then(() => {
