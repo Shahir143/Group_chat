@@ -32,20 +32,13 @@ Message.belongsTo(User, { as: 'group', foreignKey: 'groupId' });
 app.use(bodyParser.json());
 app.use(cors());
 
+app.use(express.static("public/html"));
+
 app.use('/user', userRoute);
 app.use('/chat',chatRoute); 
 app.use("/groups", GrpRoute); 
 
-app.use(express.static(path.join(__dirname, "public")));
 
-app.use((req, res) => {
-	let url = req.url;
-	if (req.url.charAt(req.url.length - 1) == "?") {
-		url = req.url.slice(0, -1);
-	}
-
-	res.sendFile(path.join(__dirname, `/public/html/${url}`));
-});
 
 // Sync models with the database
 sequelize.sync().then(() => {
