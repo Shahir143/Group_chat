@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 require('dotenv').config();
 const app = express();
+const path =require('path');
 
 const sequelize = require('./util/database');
 const userRoute = require('./routers/userRoute');
@@ -29,8 +30,16 @@ Message.belongsTo(User, { as: 'group', foreignKey: 'groupId' });
 
 app.use(bodyParser.json());
 app.use(cors());
-app.use(express.static("public"));
 
+app.use(express.static(path.join(__dirname, "public")));
+app.use((req, res) => {
+	let url = req.url;
+	if (req.url.charAt(req.url.length - 1) == "?") {
+		url = req.url.slice(0, -1);
+	}
+
+	res.sendFile(path.join(__dirname, `/public/html/${url}`));
+});
 app.use('/user', userRoute);
 app.use('/chat',chatRoute); 
 app.use("/groups", GrpRoute); 
