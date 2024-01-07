@@ -6,6 +6,7 @@ const app = express();
 const path =require('path');
 
 const sequelize = require('./util/database');
+
 const userRoute = require('./routers/userRoute');
 const chatRoute = require('./routers/chatRouter');
 const GrpRoute= require('./routers/groupRoute')
@@ -31,6 +32,10 @@ Message.belongsTo(User, { as: 'group', foreignKey: 'groupId' });
 app.use(bodyParser.json());
 app.use(cors());
 
+app.use('/user', userRoute);
+app.use('/chat',chatRoute); 
+app.use("/groups", GrpRoute); 
+
 app.use(express.static(path.join(__dirname, "public")));
 app.use((req, res) => {
 	let url = req.url;
@@ -40,9 +45,7 @@ app.use((req, res) => {
 
 	res.sendFile(path.join(__dirname, `/public/html/${url}`));
 });
-app.use('/user', userRoute);
-app.use('/chat',chatRoute); 
-app.use("/groups", GrpRoute); 
+
 
 
 // Sync models with the database
