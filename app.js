@@ -4,7 +4,6 @@ const cors = require('cors');
 require('dotenv').config();
 const app = express();
 const path=require('path');
-
 const sequelize = require('./util/database');
 const userRoute = require('./routers/userRoute');
 const chatRoute = require('./routers/chatRouter');
@@ -15,14 +14,6 @@ const Message = require('./model/messages');
 const Contact = require('./model/contactModel');
 const Group=require('./model/groupModel');
 const GroupMember=require('./model/groupMember');
-
-app.use(bodyParser.json());
-app.use(cors());
-app.use(express.static(path.join(__dirname, "public")));
-
-app.use('/user', userRoute);
-app.use('/chat',chatRoute); 
-app.use("/groups", GrpRoute); 
 
 Contact.belongsTo(User, { as: 'user', foreignKey: 'userId' });
 Contact.belongsTo(User, { as: 'contact', foreignKey: 'contactId' });
@@ -35,6 +26,15 @@ GroupMember.belongsTo(Group, { as:"group", foreignKey:"groupId"});
 Message.belongsTo(User, { as: 'sender', foreignKey: 'senderId' });
 Message.belongsTo(User, { as: 'user', foreignKey: 'receiverId' });
 Message.belongsTo(User, { as: 'group', foreignKey: 'groupId' });
+
+app.use(bodyParser.json());
+app.use(cors());
+app.use(express.static(path.join(__dirname, "public")));
+
+app.use('/user', userRoute);
+app.use('/chat',chatRoute); 
+app.use("/groups", GrpRoute); 
+
 
 // Sync models with the database
 sequelize.sync().then(() => {
