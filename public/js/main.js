@@ -13,7 +13,7 @@ const signinPassword = document.getElementById("signin-password");
 const sign_in_btn = document.querySelector("#sign-in-btn");
 const signinButton = document.getElementById("signin-button");
 const container = document.querySelector(".container");
-const BASE_URL='http://13.233.123.136:4000';
+const BASE_URL='http://localhost:4000';
 // Event Listeners
 sign_up_btn.addEventListener("click", () => {
 	container.classList.add("sign-up-mode");
@@ -90,7 +90,7 @@ async function signin(e) {
 			clearInputs(signinName, signinPassword);
 			alert("Logged in successfully.");
 			console.log("logged");
-			window.location.href = "./chat.html"; // Redirect to chat page
+			window.location.href = "../html/chat.html"; // Redirect to chat page
 
 		} else if (response.status === 401) {
 			alert("Invalid password. Please enter the correct password.");

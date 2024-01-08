@@ -180,8 +180,17 @@ exports.getSelfDetails=async (req,res)=>{
     try{
         const {user}=req;
         const details = await User.findByPk(user.id);
-        res.status(200).json({message:"user details found",data:details})
+        res.status(200).json({message:"user details found",data:{user:details}})
     }catch(err){
         res.status(500).json({ message: "getting self details"});
     }
+}
+exports.reciverDetails=async (req,res)=>{
+  try{
+      const {reciverid}=req.params;
+      const details = await User.findByPk(reciverid);
+      res.status(200).json({message:"user details found",data:details})
+  }catch(err){
+      res.status(500).json({ message: "getting self details"});
+  }
 }

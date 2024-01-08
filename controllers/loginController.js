@@ -6,9 +6,6 @@ const { Op } = require('sequelize');
 exports.main = (req, res) => {
     res.sendFile('main.html', { root: './public/html' });
 };
-exports.chat=(req,res)=>{
-    res.sendFile('chat.html', { root: './public/html' });
-}
 
 exports.signup = async (req, res,) => {
     try {
@@ -30,7 +27,6 @@ exports.signup = async (req, res,) => {
             profile_picture:req.body.profile_picture,
             bio:req.body.bio,
         });
-        console.log(user);
         return res.status(200).json({ success: true, message: 'User created successfully' });
     } catch (error) {
         console.error('Error in user signup:', error);

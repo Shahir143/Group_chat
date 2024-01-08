@@ -2,10 +2,10 @@ const Chat=require('../model/messages');
 const User=require('../model/user');
 const { Op } = require('sequelize');
 
-exports.addChat=async(req,res)=>{
+exports.addChat=async(socket,message)=>{
     try{
-        const user=req.user;
-        const {content,receiver,conservationType,timeStamp}=req.body;
+        const {user}=socket;
+        const {content,receiver,conservationType,timeStamp}=message;
         const newchatMesage=await Chat.create({
             content:content,
             timeStamp:timeStamp,
@@ -20,17 +20,18 @@ exports.addChat=async(req,res)=>{
             messageStatus:'received',
             profile_picture:receiverDetails.dataValues.profile_picture
         }
-        
-        res.status(200).json({success:true,messageStatus:"successfully saved",data:newMessage,user:user})
-    }catch(err){
+        socket.broadcast.emit("receive-message",newMessage);
+		console.log("send broadcast");
+		
+	}catch(err){
         console.log(err);
         res.status(500).json({success:false, messageStatus:"Internal server Error.Error in get chats",err})
     }
 }
-exports.sendGroupChats = async(req,res) => {
+exports.sendGroupChats = async(socket,message) => {
 	try {
-		const { user } = req;
-		const { content, receiver, conversation_type, timeStamp } = req.body;
+		const { user } = socket;
+		const { content, receiver, conversation_type, timeStamp } = message;
 
 		const newGroupMessage = await Chat.create({
 			content: content,
@@ -45,11 +46,10 @@ exports.sendGroupChats = async(req,res) => {
 			...newGroupMessage.dataValues,
 			messageStatus: "received",
 		};
-		
-        res.status(200).json({success:true,messageStatus:"successfully saved",data:{newMessage,details:user,user:receiverDetails}})
-	} catch (error) {
+		socket.broadcast.emit("group-message",newMessage);
+		console.log("send group broadcast");
+    } catch (error) {
 		console.error("Error sending group chat:", error);
-		res.status(500).json({ success: false, message: "Internal Server Error" });
 	}
 };
 exports.getChats=async(req,res)=>{
