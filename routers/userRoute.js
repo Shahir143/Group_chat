@@ -7,6 +7,7 @@ const userController=require('../controllers/users');
 
 
 route.get('/signup',logincontroller.main);
+route.get('/chat',auth.authenticationToken,logincontroller.chat);
 route.post('/signup',logincontroller.signup);
 route.post('/login',logincontroller.login);
 

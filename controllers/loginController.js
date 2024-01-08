@@ -6,7 +6,9 @@ const { Op } = require('sequelize');
 exports.main = (req, res) => {
     res.sendFile('main.html', { root: './public/html' });
 };
-
+exports.chat=(req,res)=>{
+    res.sendFile('chat.html', { root: './public/html' });
+}
 
 exports.signup = async (req, res,) => {
     try {
