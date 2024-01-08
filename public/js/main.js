@@ -90,9 +90,6 @@ async function signin(e) {
 			clearInputs(signinName, signinPassword);
 			alert("Logged in successfully.");
 			console.log("logged");
-			await axios.get(`${BASE_URL}/user/chat`,{
-				headers:{Authorization:response.data.enencryptedId}
-			})
 			window.location.href = "./chat.html"; // Redirect to chat page
 
 		} else if (response.status === 401) {
