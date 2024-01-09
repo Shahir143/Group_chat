@@ -2185,7 +2185,9 @@ async function sendGroupMsg(groupId) {
 		};
         console.log(messageDetail);
 		//Use the socket associated with this group
+
         groupSockets[groupId].emit("send-group-message", messageDetail);
+        
         const selfDetails = await axios.get(`${baseUrl}/user/self`, { headers: { Authorization: token } });
         profile_picture = selfDetails.data.data;
         console.log(profile_picture)
@@ -2777,47 +2779,5 @@ function createGroupCard(data) {
 	} catch (error) {
 		console.error("Error in createGroupCard:", error);
 		// Optionally, you can handle errors here, such as displaying an error message to the user.
-	}
-}
-async function sendGroupMsg(groupId) {
-	try {
-		// Get the receiver (current group) and conversation type from local storage
-		const receiver = localStorage.getItem("currentGroup");
-		const conversation_type = localStorage.getItem("chatActive");
-
-		// Get the message text from the chat box
-        
-		const chatBox = document.getElementById("chat-box");
-		const message = chatBox.value;
-
-		// Check if the message is empty before sending
-		if (!message.trim()) {
-			console.log("Message cannot be empty.");
-			return;
-		}
-
-		// Create a message detail object
-		const messageDetail = {
-			content: message,
-			conversation_type: conversation_type,
-			receiver: receiver,
-			timeStamp: new Date(),
-			messageStatus: "sent",
-		};
-        console.log(messageDetail);
-		//Use the socket associated with this group
-        groupSockets[groupId].emit("send-group-message", messageDetail);
-        const selfDetails = await axios.get(`${baseUrl}/user/self`, { headers: { Authorization: token } });
-        profile_picture = selfDetails.data.data;
-        console.log(profile_picture)
-            createmessage(messageDetail,profile_picture);
-            console.log(chatBox.value);
-            chatBox.value='';
-        
-		// Clear the chat box after sending
-		chatBox.value = "";
-	} catch (error) {
-		console.error("Error sending group message:", error.message);
-		// You can add additional error handling logic here, such as displaying an error message to the user.
 	}
 }
