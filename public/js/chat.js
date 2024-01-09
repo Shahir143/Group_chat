@@ -2185,7 +2185,6 @@ async function sendGroupMsg(groupId) {
 		};
         console.log(messageDetail);
 		//Use the socket associated with this group
-
         groupSockets[groupId].emit("send-group-message", messageDetail);
         
         const selfDetails = await axios.get(`${baseUrl}/user/self`, { headers: { Authorization: token } });
@@ -2203,7 +2202,11 @@ async function sendGroupMsg(groupId) {
 	}
 }
 
+async function generateGroupChat(id) {
+	const container = document.querySelector(".conversation-user");
+	container.innerHTML = "";
 
+	try {
         const response=await axios.get(`${baseUrl}/user/getGroupchat/${id}`,{headers:{Authorization:token},});
 
         console.log("response",response)
