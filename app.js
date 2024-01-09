@@ -5,6 +5,7 @@ require('dotenv').config();
 const sequelize = require('./util/database');
 const path =require('path');
 const http=require('http');
+const cron = require("node-cron");
 
 const userRoute = require('./routers/userRoute');
 const chatRoute = require('./routers/chatRouter');
@@ -15,6 +16,7 @@ const Message = require('./model/messages');
 const Contact = require('./model/contactModel');
 const Group=require('./model/groupModel');
 const GroupMember=require('./model/groupMember');
+const archived=require('./model/archivedmsgs');
 
 const authSocket=require('./middleware/socketauth');
 const chatController=require("./controllers/chatController");
@@ -22,7 +24,6 @@ const chatController=require("./controllers/chatController");
 const app = express();
 const server = http.createServer(app);
 const socketIo = require("socket.io");
-const { start } = require('repl');
 const io = socketIo(server);
 
 Contact.belongsTo(User, { as: 'user', foreignKey: 'userId' });
@@ -37,6 +38,33 @@ Message.belongsTo(User, { as: 'sender', foreignKey: 'senderId' });
 Message.belongsTo(User, { as: 'user', foreignKey: 'receiverId' });
 Message.belongsTo(User, { as: 'group', foreignKey: 'groupId' });
 
+corn.schedule("0 0 * * * ",async()=>{
+    try{
+        //Find the old Messages and Archive
+        const oneDayAgo=new Date();
+        oneDayAgo.setDate(oneDayAgo.getDate()-1);
+
+        const oldMsg=await Message.findAll({
+            where:{
+                timeStamp:{
+                    [Op.lt]:oneDayAgo,
+                }
+            }
+        })
+        await archived.bulkCreate(oldMsg.map((message)=>message.toJSON()))
+
+        await Message.destroy({
+            where:{
+                timeStamp:{
+                    [Op.lt]:oneDayAgo,
+                }
+            }
+        });
+        console.log("Chat messages archived and deleted successfully.");
+    }catch(error){
+        console.log("Error in achiveing deleting chats.");
+    }
+})
 app.use(bodyParser.json());
 app.use(cors({
 	origin: ["http://localhost:4000","http://127.0.0.1:4000", "http://13.233.123.136:4000", "http://13.233.123.136"],
