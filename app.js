@@ -38,7 +38,7 @@ Message.belongsTo(User, { as: 'sender', foreignKey: 'senderId' });
 Message.belongsTo(User, { as: 'user', foreignKey: 'receiverId' });
 Message.belongsTo(User, { as: 'group', foreignKey: 'groupId' });
 
-corn.schedule("0 0 * * * ",async()=>{
+cron.schedule("0 0 * * *", async () => {
     try{
         //Find the old Messages and Archive
         const oneDayAgo=new Date();

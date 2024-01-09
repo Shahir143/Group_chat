@@ -454,6 +454,9 @@ async function createmessage(item,data){
 			image.classList.add("conversation-item-image");// Use the actual sender's profile picture URL
 			image.alt = "";
 
+            const reciverid=localStorage.getItem("currentUser");
+			const groupid = localStorage.getItem("currentGroup");
+            
 			// Determine the CSS class based on message status
 			if (item.messageStatus === "received" && reciverid ) {
                 console.log('chat',reciverid)
