@@ -11,4 +11,6 @@ route.get(`/getGroupchat/:id`,auth.authenticationToken, chatController.getGroupC
 
 route.post("/send-group-message", auth.authenticationToken, chatController.sendGroupChats);
 
+route.post("/upload/:receiverId", auth.authenticationToken, chatController.sendAttachment);
+
 module.exports=route;

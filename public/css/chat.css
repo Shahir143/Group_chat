@@ -909,3 +909,9 @@ body {
 		padding: 16px;
 	}
 }
+.sendMessageImage{
+	width: 19rem;
+	height: 18rem;
+	display: flex;
+	justify-content: end;
+}

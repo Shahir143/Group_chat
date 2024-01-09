@@ -1,3 +1,4 @@
+const BASE_URL='http://13.233.123.136:4000';
 const username = document.getElementById("username-signup");
 const email = document.getElementById("email-signup");
 const phoneNumber = document.getElementById("contact-number");
@@ -13,7 +14,7 @@ const signinPassword = document.getElementById("signin-password");
 const sign_in_btn = document.querySelector("#sign-in-btn");
 const signinButton = document.getElementById("signin-button");
 const container = document.querySelector(".container");
-const BASE_URL='http://13.233.123.136:4000';
+
 // Event Listeners
 sign_up_btn.addEventListener("click", () => {
 	container.classList.add("sign-up-mode");

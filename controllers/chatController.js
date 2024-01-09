@@ -1,6 +1,79 @@
 const Chat=require('../model/messages');
 const User=require('../model/user');
+
+//Multer is a node.js middleware for handling multipart/form-data, which is primarily used for uploading files
+const multer = require("multer"); // For handling file uploads
+const AWS = require("aws-sdk"); // For working with AWS S3
 const { Op } = require('sequelize');
+
+
+AWS.config.update({
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: "ap-south-1",  // Use the region code, 
+});
+
+
+const s3 = new AWS.S3();
+
+// Configure Multer for file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+
+exports.sendAttachment = async (req, res) => {
+	const { user } = req;
+	const { receiverId } = req.params;
+
+	// Use upload.single('file') middleware to process the file upload
+	upload.single("file")(req, res, async (err) => {
+		if (err) {
+			// Handle the multer error (e.g., file too large, unsupported file type)
+			console.error("Multer error:", err);
+			return res.status(400).json({ success: false, error: "File upload failed." });
+		}
+
+		// Ensure that a file was uploaded
+		if (!req.file) {
+			return res.status(400).json({ success: false, error: "No file uploaded." });
+		}
+
+		// Prepare a unique file name
+		const fileName = `${req.file.originalname}_${user.id}_${new Date().toISOString()}.jpg`;
+
+		// Define parameters for the S3 upload
+		const s3Params = {
+			Bucket: process.env.BUCKET_NAME,
+			Key: fileName,  // Specify the key under which the file will be stored
+			Body: req.file.buffer,   // File content
+			ACL: process.env.AWS_BUCKET_ACCESS,
+		};
+
+		// Upload the file to S3
+		try {
+			const data = await s3.upload(s3Params).promise();
+
+			// The file has been successfully uploaded to S3, and data.Location contains the S3 URL
+			const s3FileLocation = data.Location;
+
+			// Save file details to the database
+			const saveFileToDb = await Chat.create({
+				content: req.file.originalname,
+				conversation_type: "user",
+				timeStamp: new Date(),
+				senderId: user.id,
+				receiverId,
+				fileLocation: s3FileLocation,
+				isAttachment: true,
+			});
+
+			res.status(200).json({ success: true, saveFileToDb });
+		} catch (err) {
+			console.error("S3 upload error:", err);
+			res.status(500).json({ success: false, error: "Error uploading file to S3." });
+		}
+	});
+};
 
 exports.addChat=async(socket,message)=>{
     try{
@@ -40,8 +113,6 @@ exports.sendGroupChats = async(socket,message) => {
 			groupId: receiver,
 			conversation_type: conversation_type,
 		});
-		
-        const receiverDetails=await User.findByPk(receiver);
 		const newMessage = {
 			...newGroupMessage.dataValues,
 			messageStatus: "received",
