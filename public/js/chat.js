@@ -1,4 +1,4 @@
-const baseUrl='http://13.233.123.136:4000';
+const baseUrl='http://localhost:4000';
 const token=localStorage.getItem('token');
 
 const container=document.querySelector('.content-messages-list');
@@ -47,14 +47,17 @@ async function multiMediaHandler() {
 		const data = {
 			type: "multimedia",
 			file: formData.get("file"),
+			chatId:chatId
 		};
-        console.log("multimedia in sockets",data);
-		chatSockets[chatId].emit("send-message", data);
 		const response = await axios.post(`${baseUrl}/chat/upload/${chatId}`, data, {
 			headers: { Authorization: token, "Content-Type": "multipart/form-data" },
 		});
-		const res = response.data.saveFileToDb;
-        createmessage(res, profile_picture);
+		
+		const message = response.data.data;
+        console.log(message);
+
+		chatSockets[chatId].emit("get-message", message);
+        createmessage(message, profile_picture);
 		attachmentModal.style.display = "none"; // Hide the modal
 		fileInput.value = ""; // Clear the file input
 	});
@@ -83,7 +86,6 @@ profileDropdown.addEventListener("click", (e) => {
 });
 
 function updateChatButtons(){
-    console.log("updateChatButtons");
     const chatActive=localStorage.getItem("chatActive");
     const nrmlChatBtn=document.getElementById("normal-chat-buttons");
     const grpChatBtn=document.getElementById("group-chat-buttons");
@@ -195,7 +197,6 @@ async function getAllchats(){
                     i.classList.remove("active");
                 });
 
-                console.log(document.querySelector(".conversation"))
                 // Show the selected conversation
                 document.querySelector("#conversation-1").classList.add("active");
 
@@ -318,7 +319,6 @@ async function getAllUser(){
             
             createContact(contact);
         })
-        console.log("data",document.querySelectorAll('[data-conversation]'));
         document.querySelectorAll("[data-conversation]").forEach(function (item) {
             item.addEventListener("click", async function (e) {
               e.preventDefault();
@@ -334,7 +334,6 @@ async function getAllUser(){
                     i.classList.remove("active");
                 });
 
-                console.log(document.querySelector(".conversation"))
                 // Show the selected conversation
                 document.querySelector("#conversation-1").classList.add("active");
 
@@ -418,7 +417,6 @@ async function generateHead(userData){
         divWrapper.appendChild(divStatus);
         container.appendChild(img);
         container.appendChild(divWrapper); // Append divWrapper only once
-        console.log(container);
         updateChatButtons();
 
     } catch (err) {
@@ -459,7 +457,6 @@ async function createmessage(item,data){
             
 			// Determine the CSS class based on message status
 			if (item.messageStatus === "received" && reciverid ) {
-                console.log('chat',reciverid)
 				listItem.classList.add("conversation-item", "me");
             
             const imgdetails=await axios.get(`${baseUrl}/user/details/${reciverid}`,{
@@ -507,7 +504,10 @@ async function createmessage(item,data){
 			// Create the conversation-item-time div for the timestamp
 			const timeDiv = document.createElement("div");
 			timeDiv.classList.add("conversation-item-time");
-			timeDiv.textContent = item.createdAt;
+			const dateObject = new Date(item.createdAt);
+
+            const formattedTime = `${crtTime(dateObject.getHours())}:${crtTime(dateObject.getMinutes())}:${crtTime(dateObject.getSeconds())}`;   
+            timeDiv.textContent = formattedTime;
 
 			// Append the message content and timestamp to the conversation-item-text div
 			textDiv.appendChild(imageUrl);
@@ -531,13 +531,13 @@ async function createmessage(item,data){
 			const forwardListItem = document.createElement("li");
 			const forwardLink = document.createElement("a");
 			forwardLink.href = "#";
-			forwardLink.innerHTML = '<i class="ri-share-forward-line"></i> Forward';
+			forwardLink.innerHTML = '<i class="fa-solid fa-share"></i> Forward';
 			forwardListItem.appendChild(forwardLink);
 
 			const deleteListItem = document.createElement("li");
 			const deleteLink = document.createElement("a");
 			deleteLink.href = "#";
-			deleteLink.innerHTML = '<i class="ri-delete-bin-line"></i> Delete';
+			deleteLink.innerHTML = '<i class="fa-solid fa-trash"></i> Delete';
 			deleteListItem.appendChild(deleteLink);
 
 			// Append the list items to the dropdown list
@@ -769,7 +769,7 @@ async function sendChat(id){
     const messageDetails={
         content:messageBox.value,
         receiver:receiver,
-        conservationType:conservationType,
+        conservation_type:conservationType,
         timeStamp:new Date(),
         messageStatus:"sent",
     }
@@ -897,7 +897,6 @@ async function groupHead(userData){
 async function groupMain(data,profile_picture){
     try{
         for(const item of data){
-            console.log(item);
             await createmessage(item,profile_picture);
         }
     }catch(err){console.log("Error in groupMain",err)}
@@ -939,7 +938,6 @@ infoButton.addEventListener("click",async()=>{
         const checkAdmin=await axios.get(`${baseUrl}/groups/${groupId}/isAdmin`,{
             headers:{Authorization:token}
         });
-        console.log(checkAdmin.data);
         const {isAdmin}=checkAdmin.data;
         if(isAdmin===true){
             addMembersModal.style.display="block";
@@ -1190,7 +1188,6 @@ function closeProfileSidebarOnClick(e) {
 document.addEventListener("click", closeProfileSidebarOnClick);
 
 function toggleConversationItemDropdown(e) {
-    console.log("toggleConversationItemDropdown")
 	try {
 		e.preventDefault();
 		const parentElement = this.parentElement;
@@ -1209,13 +1206,13 @@ function toggleConversationItemDropdown(e) {
 }
 
 document.querySelectorAll(".conversation-item-dropdown-toggle").forEach(function (item) {
-	item.addEventListener("click", toggleConversationItemDropdown);
+    console.log("Found element:", item);
+    item.addEventListener("click", toggleConversationItemDropdown);
 });
 
 function handleOutsideClick(e) {
 	try {
 		if (!e.target.matches(".conversation-item-dropdown, .conversation-item-dropdown *")) {
-            console.log("dropdrown")
 			// Deactivate all conversation item dropdowns
 			document.querySelectorAll(".conversation-item-dropdown").forEach(function (item) {
 				item.classList.remove("active");
@@ -1327,13 +1324,10 @@ function handleModal() {
                     profile_picture: profile_picture.value
                 };
 
-                console.log(groupDetails);
 				// Send a POST request to the server to create the group
 				const response = await axios.post(`${baseUrl}/groups/create-group`, groupDetails, {
 					headers: { Authorization: token },
 				});
-
-                console.log(response.data)
                 const group=response.data.data;
 				modal.style.display = "none";
                 await createGroupCard(group);
@@ -1441,15 +1435,11 @@ async function sendGroupMsg(groupId) {
 			timeStamp: new Date(),
 			messageStatus: "sent",
 		};
-        console.log(messageDetail);
 		//Use the socket associated with this group
         groupSockets[groupId].emit("send-group-message", messageDetail);
 
         const selfDetails = await axios.get(`${baseUrl}/user/self`, { headers: { Authorization: token } });
-        profile_picture = selfDetails.data.data;
-        console.log(profile_picture)
             createmessage(messageDetail,profile_picture);
-            console.log(chatBox.value);
             chatBox.value='';
         
 		// Clear the chat box after sending

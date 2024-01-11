@@ -535,7 +535,6 @@ body {
 	padding: 4px 0;
 	list-style-type: none;
 	opacity: 0;
-	visibility: hidden;
 	transform: scale(0.9);
 	transform-origin: left top;
 	transition: all 0.15s ease-in-out;

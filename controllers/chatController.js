@@ -67,22 +67,41 @@ exports.sendAttachment = async (req, res) => {
 				isAttachment: true,
 			});
 
-			res.status(200).json({ success: true, saveFileToDb });
+			res.status(200).json({ success: true, data:saveFileToDb });
 		} catch (err) {
 			console.error("S3 upload error:", err);
 			res.status(500).json({ success: false, error: "Error uploading file to S3." });
 		}
 	});
 };
+exports.getMessage=async(socket,message)=>{
+	try{
+		const {id,receiverId}=message;
+		const msgDetails=await Chat.findByPk(id);
 
+		const receiverDetails=await User.findByPk(receiverId);
+        
+        const newMessage={
+            ...msgDetails.dataValues,
+            messageStatus:'received',
+            profile_picture:receiverDetails.dataValues.profile_picture
+        }
+		socket.broadcast.emit("receive-message",newMessage);
+		console.log("send broadcast");
+		
+	}catch(err){
+        console.log(err);
+        res.status(500).json({success:false, messageStatus:"Internal server Error.Error in get chats",err})
+    }
+}
 exports.addChat=async(socket,message)=>{
     try{
         const {user}=socket;
-        const {content,receiver,conservationType,timeStamp}=message;
+        const {content,receiver,conservation_type,timeStamp}=message;
         const newchatMesage=await Chat.create({
             content:content,
             timeStamp:timeStamp,
-            conservation_type:conservationType,
+            conservation_type:conservation_type,
             senderId:user.id,
             receiverId:receiver
         })

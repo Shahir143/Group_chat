@@ -2,9 +2,14 @@ const {DataTypes}=require('sequelize');
 const sequelize=require('../util/database');
 
 const Message=sequelize.define('Messages',{
+    id:{
+        type:DataTypes.INTEGER,
+        autoIncrement:true,
+        allowNull:false,
+        primaryKey:true
+    },
     content:{
         type:DataTypes.TEXT,
-        allowNull:false
     },
     conservation_type:{
         type:DataTypes.ENUM('user','group'),
@@ -13,7 +18,6 @@ const Message=sequelize.define('Messages',{
     },
     timeStamp:{
         type:DataTypes.DATE,
-        allowNull:false
     },
     isAttachment:{
         type:DataTypes.BOOLEAN,

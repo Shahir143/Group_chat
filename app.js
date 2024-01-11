@@ -96,6 +96,10 @@ io.on('connection',(socket)=>{
                 chatController.addChat(socket,message);
                 console.log("message Sent");
             })
+            socket.on("get-message",(message)=>{
+                chatController.getMessage(socket,message);
+                console.log("get message")
+            })
             socket.on("send-group-message",(message)=>{
                 console.log('socket');
                 chatController.sendGroupChats(socket,message);
