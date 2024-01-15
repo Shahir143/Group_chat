@@ -1,4 +1,4 @@
-const baseUrl='http://localhost:4000';
+const baseUrl='http://13.233.123.136:4000';
 const token=localStorage.getItem('token');
 
 const container=document.querySelector('.content-messages-list');
@@ -56,7 +56,7 @@ async function multiMediaHandler() {
 		const message = response.data.data;
         console.log(message);
 
-		chatSockets[chatId].emit("get-message", message);
+		chatSockets[chatId].emit("get-message", message);//This method is responsible for sending messages. socket
         createmessage(message, profile_picture);
 		attachmentModal.style.display = "none"; // Hide the modal
 		fileInput.value = ""; // Clear the file input
@@ -473,7 +473,6 @@ async function createmessage(item,data){
                 image.src = `${data.user.profile_picture}`;
 			}
 			
-
 			// Append the image to the conversation-item-side div
 			sideDiv.appendChild(image);
 
@@ -500,7 +499,7 @@ async function createmessage(item,data){
 			imageUrl.textContent = item.content;
 			imageUrl.src = item.fileLocation;
 
-
+            
 			// Create the conversation-item-time div for the timestamp
 			const timeDiv = document.createElement("div");
 			timeDiv.classList.add("conversation-item-time");
@@ -523,30 +522,8 @@ async function createmessage(item,data){
 			toggleButton.classList.add("conversation-item-dropdown-toggle");
 			toggleButton.innerHTML = `<i class="ri-more-2-line"></i>`;
 
-			// Create the dropdown list
-			const dropdownList = document.createElement("ul");
-			dropdownList.classList.add("conversation-item-dropdown-list");
-
-			// Create list items with links for the dropdown
-			const forwardListItem = document.createElement("li");
-			const forwardLink = document.createElement("a");
-			forwardLink.href = "#";
-			forwardLink.innerHTML = '<i class="fa-solid fa-share"></i> Forward';
-			forwardListItem.appendChild(forwardLink);
-
-			const deleteListItem = document.createElement("li");
-			const deleteLink = document.createElement("a");
-			deleteLink.href = "#";
-			deleteLink.innerHTML = '<i class="fa-solid fa-trash"></i> Delete';
-			deleteListItem.appendChild(deleteLink);
-
-			// Append the list items to the dropdown list
-			dropdownList.appendChild(forwardListItem);
-			dropdownList.appendChild(deleteListItem);
-
 			// Append the dropdown toggle button and dropdown list to the conversation-item-dropdown div
 			dropdownDiv.appendChild(toggleButton);
-			dropdownDiv.appendChild(dropdownList);
 
 			// Append the conversation-item-text and conversation-item-dropdown divs to the conversation-item-box div
 			boxDiv.appendChild(textDiv);
@@ -648,30 +625,8 @@ async function createmessage(item,data){
 			toggleButton.classList.add("conversation-item-dropdown-toggle");
 			toggleButton.innerHTML = `<i class="ri-more-2-line"></i>`;
 
-			// Create the dropdown list
-			const dropdownList = document.createElement("ul");
-			dropdownList.classList.add("conversation-item-dropdown-list");
-
-			// Create list items with links for the dropdown
-			const forwardListItem = document.createElement("li");
-			const forwardLink = document.createElement("a");
-			forwardLink.href = "#";
-			forwardLink.innerHTML = '<i class="ri-share-forward-line"></i> Forward';
-			forwardListItem.appendChild(forwardLink);
-
-			const deleteListItem = document.createElement("li");
-			const deleteLink = document.createElement("a");
-			deleteLink.href = "#";
-			deleteLink.innerHTML = '<i class="ri-delete-bin-line"></i> Delete';
-			deleteListItem.appendChild(deleteLink);
-
-			// Append the list items to the dropdown list
-			dropdownList.appendChild(forwardListItem);
-			dropdownList.appendChild(deleteListItem);
-
 			// Append the dropdown toggle button and dropdown list to the conversation-item-dropdown div
 			dropdownDiv.appendChild(toggleButton);
-			dropdownDiv.appendChild(dropdownList);
 
 			// Append the conversation-item-text and conversation-item-dropdown divs to the conversation-item-box div
 			boxDiv.appendChild(textDiv);
@@ -1186,29 +1141,6 @@ function closeProfileSidebarOnClick(e) {
 }
 
 document.addEventListener("click", closeProfileSidebarOnClick);
-
-function toggleConversationItemDropdown(e) {
-	try {
-		e.preventDefault();
-		const parentElement = this.parentElement;
-		if (parentElement.classList.contains("active")) {
-			parentElement.classList.remove("active");
-		} else {
-			// Deactivate all other conversation item dropdowns
-			document.querySelectorAll(".conversation-item-dropdown").forEach(function (item) {
-				item.classList.remove("active");
-			});
-			parentElement.classList.add("active");
-		}
-	} catch (error) {
-		console.error("Error handling click event:", error);
-	}
-}
-
-document.querySelectorAll(".conversation-item-dropdown-toggle").forEach(function (item) {
-    console.log("Found element:", item);
-    item.addEventListener("click", toggleConversationItemDropdown);
-});
 
 function handleOutsideClick(e) {
 	try {

@@ -161,7 +161,7 @@ exports.getChats=async(req,res)=>{
 			},
 		});
         console.log("dbmessgaes",dbMessages)
-        let offset=dbMessages<=100?0:dbMessages-limit;
+        let offset=dbMessages<=100?0:dbMessages-limit;//set the offset of the page dbmessages < limit(100)
         const response=await Chat.findAll({
             where:{
                 [Op.or]:[
@@ -170,9 +170,9 @@ exports.getChats=async(req,res)=>{
                 ],
                 conservation_type:"user",
             },
-            order:[['timestamp', 'ASC']],
+            order:[['timeStamp', 'ASC']],
             offset:offset,
-            limit:limit,
+            limit:limit,//which indicate respectively how many records to skip and how many to take
         })
 
         const reciverDetails=await User.findByPk(receiver_id)

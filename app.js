@@ -5,7 +5,7 @@ require('dotenv').config();
 const sequelize = require('./util/database');
 const path =require('path');
 const http=require('http');
-const cron = require("node-cron");
+const cron = require("node-cron");// schedules defined using the cron syntax. Perfect for tasks like data backups
 
 const userRoute = require('./routers/userRoute');
 const chatRoute = require('./routers/chatRouter');
@@ -56,7 +56,7 @@ cron.schedule("0 0 * * *", async () => {
         await Message.destroy({
             where:{
                 timeStamp:{
-                    [Op.lt]:oneDayAgo,
+                    [Op.lt]:oneDayAgo,//lt=less than
                 }
             }
         });
@@ -82,17 +82,17 @@ app.use((req, res) => {
 		url = req.url.slice(0, -1);
 	}
 
-	res.sendFile(path.join(__dirname, `/Front-End/Html/${url}`));
+	res.sendFile(path.join(__dirname, `/public/html/${url}`));
 });
 //handle the webSockets
-io.on('connection',(socket)=>{
+io.on('connection',(socket)=>{  // initialize the connection between the client and server, and to send and receive messages.
     authSocket.authenticateSocket(socket,(err)=>{
         if(err){
             console.log("Authentication Error ", err.Message);
             socket.disconnect(true);
         }else{
             console.log("Authentication Success");
-            socket.on("send-message",(message)=>{
+            socket.on("send-message",(message)=>{  //This method is responsible for listening for incoming messages.Triggers the provided callback function when a matching event is received.
                 chatController.addChat(socket,message);
                 console.log("message Sent");
             })
