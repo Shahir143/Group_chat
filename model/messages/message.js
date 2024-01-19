@@ -1,5 +1,5 @@
 const {DataTypes}=require('sequelize');
-const sequelize=require('../util/database');
+const sequelize=require('../../util/database');
 
 const Message=sequelize.define('Messages',{
     id:{
@@ -12,9 +12,9 @@ const Message=sequelize.define('Messages',{
         type:DataTypes.TEXT,
     },
     conservation_type:{
-        type:DataTypes.ENUM('user','group'),
+        type:DataTypes.ENUM('USER','GROUP'),
         allowNull:false,
-        defaultValue:'user',
+        defaultValue:'USER',
     },
     timeStamp:{
         type:DataTypes.DATE,

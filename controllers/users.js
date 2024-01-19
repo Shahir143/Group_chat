@@ -1,7 +1,7 @@
 const User = require('../model/user');
 const Contact = require('../model/contactModel');
 const { Op } = require('sequelize');
-const Group=require('../model/groupModel');
+const Group=require('../model/group');
 
 
 exports.getContacts = async (req, res) => {
@@ -116,7 +116,7 @@ exports.addContact = async (req, res) => {
     }
 
     await Contact.create({
-      requestStatus: "pending",
+      requestStatus: "Pending",
       userId: id,
       contactId: contactId,
       sentBy: id,
@@ -134,8 +134,8 @@ exports.getRequest =async (req,res)=>{
 		const friends = await Contact.findAll({
 			where: {
 				[Op.or]: [
-					{ userId: id, requestStatus: "pending" },
-					{ contactId: id, requestStatus: "pending" },
+					{ userId: id, requestStatus: "Pending" },
+					{ contactId: id, requestStatus: "Pending" },
 				],
 				sentBy: {
 					[Op.not]: id,
@@ -162,7 +162,7 @@ exports.acceptRequest=async(req,res)=>{
             {
                 where:{
                     contactId:user.id,
-                    requestStatus:"pending",
+                    requestStatus:"Pending",
                     sentBy:contactId
                 }
         })

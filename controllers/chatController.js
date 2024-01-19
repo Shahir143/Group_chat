@@ -1,4 +1,4 @@
-const Chat=require('../model/messages');
+const Chat=require('../model/messages/message');
 const User=require('../model/user');
 
 //Multer is a node.js middleware for handling multipart/form-data, which is primarily used for uploading files
@@ -17,8 +17,8 @@ AWS.config.update({
 const s3 = new AWS.S3();
 
 // Configure Multer for file uploads
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const storage = multer.memoryStorage();//implementation configured to store files in memory as Buffer objects
+const upload = multer({ storage });//responsible for processing files uploaded via Multer
 
 
 exports.sendAttachment = async (req, res) => {
@@ -28,6 +28,7 @@ exports.sendAttachment = async (req, res) => {
 	// Use upload.single('file') middleware to process the file upload
 	upload.single("file")(req, res, async (err) => {
 		if (err) {
+
 			// Handle the multer error (e.g., file too large, unsupported file type)
 			console.error("Multer error:", err);
 			return res.status(400).json({ success: false, error: "File upload failed." });
@@ -171,15 +172,14 @@ exports.getChats=async(req,res)=>{
                 conservation_type:"user",
             },
             order:[['timeStamp', 'ASC']],
-            offset:offset,
-            limit:limit,//which indicate respectively how many records to skip and how many to take
+            offset:offset,// skips the offset rows before beginning to return the rows.
+            limit:limit,//the number of rows (row_count) returned by the query
         })
 
         const reciverDetails=await User.findByPk(receiver_id)
         const messages=response.map((obj)=>({
             ...obj.dataValues,
             messageStatus:obj.dataValues.senderId==id?'sent':'received',
-            prevMessages:offset>0?true:false,
         }))
         
         res.status(200).json({success:true, messageStatus:"Retrieved all Chats",data:{messages,user:user,details:reciverDetails}})
@@ -213,7 +213,6 @@ exports.getGroupChats = async (req, res) => {
 		const messages = response.map((obj) => ({
 			...obj.dataValues,
 			messageStatus: obj.dataValues.senderId == user.id ? "sent" : "received",
-			prevMessages: offset > 0 ? true : false,
 		}));
 
 		res.status(200).json({

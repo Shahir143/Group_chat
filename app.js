@@ -7,14 +7,14 @@ const path =require('path');
 const http=require('http');
 const cron = require("node-cron");// schedules defined using the cron syntax. Perfect for tasks like data backups
 
-const userRoute = require('./routers/userRoute');
-const chatRoute = require('./routers/chatRouter');
-const GrpRoute= require('./routers/groupRoute')
+const userRoute = require('./route/user-route');
+const chatRoute = require('./route/chat-router');
+const GrpRoute= require('./route/group-route')
 
 const User = require('./model/user');
-const Message = require('./model/messages');
+const Message = require('./model/message');
 const Contact = require('./model/contactModel');
-const Group=require('./model/groupModel');
+const Group=require('./model/group');
 const GroupMember=require('./model/groupMember');
 const archived=require('./model/archivedmsgs');
 
@@ -47,7 +47,7 @@ cron.schedule("0 0 * * *", async () => {
         const oldMsg=await Message.findAll({
             where:{
                 timeStamp:{
-                    [Op.lt]:oneDayAgo,
+                    [Op.lt]:oneDayAgo,//lt=less than
                 }
             }
         })
@@ -56,7 +56,7 @@ cron.schedule("0 0 * * *", async () => {
         await Message.destroy({
             where:{
                 timeStamp:{
-                    [Op.lt]:oneDayAgo,//lt=less than
+                    [Op.lt]:oneDayAgo,
                 }
             }
         });

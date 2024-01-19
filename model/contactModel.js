@@ -3,7 +3,7 @@ const sequelize=require('../util/database');
 
 const Contact =sequelize.define("Contact",{
     requestStatus:{
-        type:DataTypes.STRING,
+        type:DataTypes.ENUM('Pending','Accepted'),
         allowNull:false,
         defaultValue:"Pending",
     },

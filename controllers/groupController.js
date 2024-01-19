@@ -1,4 +1,4 @@
-const Group=require('../model/groupModel')
+const Group=require('../model/group')
 const GroupMember=require('../model/groupMember');
 
 const User=require('../model/user');
